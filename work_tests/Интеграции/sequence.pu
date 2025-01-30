@@ -1,0 +1,51 @@
+@startuml simple-market
+
+actor Пользователь
+participant "Приложение" as App
+participant Back
+participant "База данных" as BD
+
+
+activate Пользователь
+Пользователь -> App: переходит на главную страницу приложения
+activate App
+App -> Back: Отправляет http запрос (GET /products)
+activate Back
+Back -> BD: SQL запрос на получение данных
+activate BD
+BD --> Back: Возвращает ответ на запрос
+deactivate BD
+Back --> App: Возвращает json с ответом
+deactivate Back
+App --> Пользователь: Отображение списка товаров
+deactivate App
+
+Пользователь -> App: Нажимает на конкретный товар на витрине
+activate App
+App -> Back: Отправляет http запрос (GET /products/{productsId})
+activate Back
+Back -> BD: SQL запрос на получение данных
+activate BD
+BD --> Back: Возвращает ответ на запрос
+deactivate BD
+Back --> App: Возвращает json с ответом
+deactivate Back
+App --> Пользователь: Отображения выбранного товара
+deactivate App
+
+
+Пользователь -> App: Нажимает на кнопку добавления товара в корзину
+activate App
+App -> Back: Отправляет http запрос (POST /cart)
+activate Back
+Back -> BD: SQL запрос на изменение данных
+activate BD
+BD --> Back: Возвращает ответ на запрос
+deactivate BD
+Back --> App: Возвращает json с ответом
+deactivate Back
+App --> Пользователь: Подтверждение добавления товара
+deactivate App
+deactivate Пользователь
+
+@enduml 

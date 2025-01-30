@@ -1,0 +1,218 @@
+openapi: 3.0.0
+info:
+  title: Интернет-магазин API
+  description: API для работы с витриной товаров, деталями товаров и корзиной
+  version: 1.0.0
+  
+servers:
+  - url: https://simple-market/api/v1
+    description: Основной сервер
+    
+tags:
+  - name: products
+    description: группа методов для работы с товарами
+    
+
+paths:
+  /products:
+    get:
+      tags:
+        - products
+      summary: Получить список товаров
+      description: Возвращает список товаров с кратким описанием и возможностью пагинации.
+      parameters:
+        - name: limit
+          in: query
+          description: Количество товаров на странице
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    required:
+                    - products
+                    items:
+                      $ref: '#/components/schemas/ProductShort'
+                  total:
+                    type: integer
+                    description: Общее количество товаров
+  /products/{productId}:
+    get:
+      tags:
+        - products
+      summary: Получить детальную информацию о товаре
+      description: Возвращает детальную информацию о конкретном товаре.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID товара
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+  /cart:
+    post:
+      tags:
+        - products
+      summary: Добавить товар в корзину
+      description: Добавляет товар в корзину пользователя.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: integer
+                  description: ID пользователя
+                productId:
+                  type: integer
+                  description: ID товара
+                quantity:
+                  type: integer
+                  description: Количество товара
+                  default: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+components:
+  schemas:
+    ProductShort:
+      required:
+        - id
+        - name
+        - price
+        - shortDescription
+        - imageUrl
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Уникальный идентификатор товара
+        name:
+          type: string
+          description: Название товара
+        price:
+          type: number
+          description: Цена товара
+        shortDescription:
+          type: string
+          description: Краткое описание товара
+        imageUrl:
+          type: string
+          description: Ссылка на изображение товара
+    ProductDetail:
+      required:
+        - id
+        - name
+        - price
+        - description
+        - imageUrl
+        - specifications
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Уникальный идентификатор товара
+        name:
+          type: string
+          description: Название товара
+        price:
+          type: number
+          description: Цена товара
+        description:
+          type: string
+          description: Полное описание товара
+        imageUrl:
+          type: string
+          description: Ссылка на изображение товара
+        specifications:
+          type: object
+          description: Характеристики товара
+          properties:
+            display:
+              type: string
+              description: Описание дисплея
+            processor:
+              type: string
+              description: Процессор
+            ram:
+              type: string
+              description: Оперативная память
+            storage:
+              type: string
+              description: Встроенная память
+    CartResponse:
+      type: object
+      required:
+        - success
+        - message
+        - cart
+      properties:
+        success:
+          type: boolean
+          description: Успешность операции
+        message:
+          type: string
+          description: Сообщение о результате
+        cart:
+          type: object
+          required:
+            - items
+            - totalItems
+            - totalPrice
+          description: Состояние корзины
+          properties:
+            items:
+              type: array
+              description: Список товаров в корзине
+              items:
+                type: object
+                required:
+                  - productId
+                  - name
+                  - price
+                  - quantity
+                  - total
+                properties:
+                  productId:
+                    type: integer
+                    description: ID товара
+                  name:
+                    type: string
+                    description: Название товара
+                  price:
+                    type: number
+                    description: Цена товара
+                  quantity:
+                    type: integer
+                    description: Количество товара
+                  total:
+                    type: number
+                    description: Общая стоимость товара
+            totalItems:
+              type: integer
+              description: Общее количество товаров в корзине
+            totalPrice:
+              type: number
+              description: Общая стоимость корзины
